@@ -5,14 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Matheus Santana</title>
   <style>
-    body {
-      margin: 0 auto;
-      max-width: 1200px;
-      padding: 16px;
-      font-family: system-ui;
-      background: rgb(7%, 7%, 7%);
-      color: rgb(93%, 93%, 93%);
-    }
+  :root {
+    --outer-bg: hsl(45 13% 8%);
+    --page-bg:  hsl(40 12% 5%);
+    --text:     hsl(40 45% 84%); 
+  }
+html {
+  background: var(--outer-bg);
+}
+body {
+  margin: 0 auto;
+  max-width: 1200px;
+  min-height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: system-ui;
+  background: var(--page-bg);
+  color: var(--text);
+}
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -59,7 +69,7 @@
     <img src="images/southern_ground_hornbill.jpg" alt="Southern ground hornbill">
     <img src="images/monk_parakeets.jpg" alt="Monk parakeets">
     <img src="images/marabou_stork.jpg" alt="Marabou stork">
-    <img src="images/saddle_billed_stork.jpg" alt="Saddle-billed stork" style="object-position: center 30%;">
+    <img src="images/saddle_billed_stork.jpg" alt="Saddle-billed stork" style="object-fit: contain;">
     <img src="images/cat_tuxedo_grass.jpg" alt="Domestic cat (black and white)">
     <img src="images/peacock.jpeg" alt="Indian peafowl">
   </div>
