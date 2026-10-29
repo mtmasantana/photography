@@ -13,6 +13,12 @@
 html {
   background: var(--outer-bg);
 }
+<script>
+document.querySelectorAll('.gallery img').forEach(img => {
+  const set = () => img.style.setProperty('--ar', img.naturalWidth / img.naturalHeight);
+  img.complete ? set() : img.addEventListener('load', set);
+});
+</script>
 body {
   margin: 0 auto;
   max-width: 1200px;
@@ -23,28 +29,22 @@ body {
   background: var(--page-bg);
   color: var(--text);
 }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      grid-auto-flow: dense;
-      gap: 12px;
-    }
-    .gallery img {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 3 / 2;
-      object-fit: cover;
-      display: block;
-    }
-    .gallery img.tall {
-      grid-row: span 2;
-      aspect-ratio: auto;
-      height: 100%;
-      contain: size;
-    }
-    .gallery img.wide {
-      grid-column: span 2;
-    }
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .gallery img {
+    flex: var(--ar, 1.5) 1 calc(var(--ar, 1.5) * 260px);
+    min-width: 0;
+    height: auto;
+    aspect-ratio: var(--ar, 1.5);
+    display: block;
+  }
+  .gallery::after {
+    content: "";
+    flex-grow: 999;
+  }
   </style>
 </head>
 <body>
@@ -64,12 +64,12 @@ body {
     <img src="images/muscovy_ducks.jpg" alt="Muscovy ducks">
     <img src="images/mallard.jpg" alt="Mallard">
     <img src="images/geraniums.JPG" alt="Geraniums">
-    <img class="tall" src="images/peacock_pheasant.jpg" alt="Peacock pheasant" style="object-position: right center;">
-    <img class="tall" src="images/common_kestrel.jpg" alt="Common kestrel">
+    <img src="images/peacock_pheasant.jpg" alt="Peacock pheasant">
+    <img src="images/common_kestrel.jpg" alt="Common kestrel">
     <img src="images/southern_ground_hornbill.jpg" alt="Southern ground hornbill">
     <img src="images/monk_parakeets.jpg" alt="Monk parakeets">
     <img src="images/marabou_stork.jpg" alt="Marabou stork">
-    <img src="images/saddle_billed_stork.jpg" alt="Saddle-billed stork" style="object-fit: contain;">
+    <img src="images/saddle_billed_stork.jpg" alt="Saddle-billed stork">
     <img src="images/cat_tuxedo_grass.jpg" alt="Domestic cat (black and white)">
     <img src="images/peacock.jpeg" alt="Indian peafowl">
   </div>
