@@ -10,18 +10,30 @@
       max-width: 1200px;
       padding: 16px;
       font-family: system-ui;
-      background: #111;
-      color: #eee;
+      background: rgb(7%, 7%, 7%);
+      color: rgb(93%, 93%, 93%);
     }
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-auto-flow: dense;
       gap: 12px;
     }
     .gallery img {
       width: 100%;
       height: auto;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
       display: block;
+    }
+    .gallery img.tall {
+      grid-row: span 2;
+      aspect-ratio: auto;
+      height: 100%;
+      contain: size;
+    }
+    .gallery img.wide {
+      grid-column: span 2;
     }
   </style>
 </head>
@@ -42,8 +54,8 @@
     <img src="images/muscovy_ducks.jpg" alt="Muscovy ducks">
     <img src="images/mallard.jpg" alt="Mallard">
     <img src="images/geraniums.JPG" alt="Geraniums">
-    <img src="images/peacock_pheasant.jpg" alt="Peacock pheasant">
-    <img src="images/common_kestrel.jpg" alt="Common kestrel">
+    <img class="tall" src="images/peacock_pheasant.jpg" alt="Peacock pheasant">
+    <img class="tall" src="images/common_kestrel.jpg" alt="Common kestrel">
     <img src="images/southern_ground_hornbill.jpg" alt="Southern ground hornbill">
     <img src="images/monk_parakeets.jpg" alt="Monk parakeets">
     <img src="images/marabou_stork.jpg" alt="Marabou stork">
