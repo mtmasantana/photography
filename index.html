@@ -58,18 +58,30 @@ body {
   object-fit: contain;
 }
 .intro {
+  position: relative;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 16px;
+}
+.intro > div,
+.me {
+  position: relative;
+  z-index: 1;
 }
 .intro h1 {
   margin: 0 0 8px;
 }
 .intro p {
   margin: 0;
-}    
+}
+.wander {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
 .me {
   display: flex;
   flex-direction: row-reverse;
@@ -90,12 +102,14 @@ body {
   text-wrap: balance;
 }
 @media (max-width: 600px) {
-  .intro { flex-direction: column; align-items: flex-start; }
+  .intro { flex-direction: column; }
+  .wander { display: none; }
 }
 </style>
 </head>
 <body>
 <header class="intro">
+  <canvas class="wander" aria-hidden="true"></canvas>
   <div>
     <h1>Matheus Martinelli Santana</h1>
     <p>Some of my favorite photographs I've taken</p>
@@ -129,5 +143,77 @@ body {
     <img src="images/peacock.jpeg" alt="Indian peafowl">
     <img src="images/dog.jpeg" alt="Domestic dog (orange)">
   </div>
+<script>
+// A "turtle" that wanders in a random walk through the empty part of the header,
+// leaving a faint trail that slowly fades. It steers around the title.
+(() => {
+  const intro = document.querySelector('.intro');
+  const canvas = intro.querySelector('.wander');
+  const text = intro.querySelector('div');
+  const fig = intro.querySelector('.me');
+  const ctx = canvas.getContext('2d');
+  const ink = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let W = 0, H = 0, x, y, angle, box, frame = 0;
+
+  function layout() {
+    const r = intro.getBoundingClientRect();
+    const f = fig.getBoundingClientRect();
+    const t = text.getBoundingClientRect();
+    W = Math.max(0, f.left - r.left - 24);
+    H = r.height;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.strokeStyle = ink;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.2;
+    ctx.lineCap = 'round';
+    box = { l: t.left - r.left - 16, t: t.top - r.top - 10,
+            r: t.right - r.left + 16, b: t.bottom - r.top + 10 };
+    x = (box.r + W) / 2;
+    y = H / 2;
+    angle = Math.random() * Math.PI * 2;
+    if (still) for (let i = 0; i < 6000; i++) step();
+  }
+
+  function blocked(px, py) {
+    return px < 6 || py < 6 || px > W - 6 || py > H - 6 ||
+      (px > box.l && px < box.r && py > box.t && py < box.b);
+  }
+
+  function step() {
+    angle += (Math.random() + Math.random() + Math.random() - 1.5) * 0.5;
+    const nx = x + Math.cos(angle) * 1.4;
+    const ny = y + Math.sin(angle) * 1.4;
+    if (blocked(nx, ny)) { angle += Math.PI * (0.6 + Math.random() * 0.8); return; }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(nx, ny);
+    ctx.stroke();
+    x = nx; y = ny;
+  }
+
+  function tick() {
+    if (++frame % 10 === 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.globalAlpha = 0.05;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+    for (let i = 0; i < 3; i++) step();
+    requestAnimationFrame(tick);
+  }
+
+  new ResizeObserver(layout).observe(intro);
+  layout();
+  if (!still) requestAnimationFrame(tick);
+})();
+</script>
 </body>
 </html>
