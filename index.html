@@ -132,7 +132,7 @@ body {
   </div>
   <figure class="me">
     <img src="images/me_with_cat.jpg" width="914" height="800" alt="Cat on lap from far away">
-    <figcaption>(My sister took this one. It's the cat from the photo at the bottom on my lap.)</figcaption>
+    <figcaption>(My sister took this one. It's the cat from the photo at the bottom on my lap)</figcaption>
   </figure>
 </header>
   <div class="gallery">
@@ -304,7 +304,7 @@ body {
       sprite.style.opacity = '';
       const path = route({ x: t.tx, y: t.ty }, t.pts[0]);
       if (path) { t.path = path; t.target = t.path.shift(); t.phase = 'walk'; }
-      else { t.phase = 'hop'; t.timer = 20; }
+      else { t.phase = 'hop'; t.timer = 20; t.hopped = false; }
       if (still) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; while (t.i < t.pts.length) t.advance(1e9); t.phase = 'done'; t.place(); }
     };
 
@@ -327,29 +327,30 @@ body {
       sprite.style.transform = `translate(${t.tx}px, ${t.ty}px) rotate(${t.heading * 180 / Math.PI + 90}deg)`;
     };
 
-    t.tick = () => {
+    t.tick = dt => {
       if (t.phase === 'walk') {
         const dx = t.target.x - t.tx, dy = t.target.y - t.ty, d = Math.hypot(dx, dy);
-        if (d < 2) {
+        const step = 2 * dt;
+        if (d <= Math.max(2, step)) {
           t.tx = t.target.x; t.ty = t.target.y;
           if (t.path.length) t.target = t.path.shift(); else t.phase = 'draw';
         }
-        else { t.heading = Math.atan2(dy, dx); t.tx += dx / d * 2; t.ty += dy / d * 2; }
+        else { t.heading = Math.atan2(dy, dx); t.tx += dx / d * step; t.ty += dy / d * step; }
       } else if (t.phase === 'hop') {
-        t.timer--;
-        if (t.timer === 10) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; }
-        sprite.style.opacity = Math.abs(t.timer - 10) / 10;
+        t.timer -= dt;
+        if (!t.hopped && t.timer <= 10) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; t.hopped = true; }
+        sprite.style.opacity = Math.min(1, Math.abs(t.timer - 10) / 10);
         if (t.timer <= 0) { sprite.style.opacity = ''; t.phase = 'draw'; }
       } else if (t.phase === 'draw') {
-        t.advance(t.speed);
+        t.advance(t.speed * dt);
         if (t.i >= t.pts.length) { t.phase = 'admire'; t.timer = 180; t.firstDone = true; }
       } else if (t.phase === 'admire') {
-        if (--t.timer <= 0) { t.phase = 'clear'; t.timer = 30; }
+        if ((t.timer -= dt) <= 0) { t.phase = 'clear'; t.timer = 30; }
       } else if (t.phase === 'clear') {
-        ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 0.15; ctx.fillRect(0, 0, W, H); ctx.restore();
-        if (--t.timer <= 0) t.start();
+        ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1 - Math.pow(0.85, dt); ctx.fillRect(0, 0, W, H); ctx.restore();
+        if ((t.timer -= dt) <= 0) t.start();
       } else if (t.phase === 'wait') {
-        if (--t.timer <= 0) t.start();
+        if ((t.timer -= dt) <= 0) t.start();
       }
       t.place();
     };
@@ -379,8 +380,11 @@ body {
     turtles.forEach(t => t.resize());
   }
 
-  function frame() {
-    turtles.forEach(t => t.tick());
+  let last = null;
+  function frame(now) {
+    const dt = last === null ? 1 : Math.min((now - last) / (1000 / 60), 4);
+    last = now;
+    turtles.forEach(t => t.tick(dt));
     requestAnimationFrame(frame);
   }
 
