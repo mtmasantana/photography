@@ -168,15 +168,17 @@ body {
   const ctx = canvas.getContext('2d');
   const ink = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const FRACTALS = [
-    { axiom: 'F--F--F', rules: { F: 'F+F--F+F' }, angle: 60, depth: 3, draw: 'F', heading: 0 },               //koch snowflake
-    { axiom: 'FX', rules: { X: 'X+YF+', Y: '-FX-Y' }, angle: 90, depth: 10, draw: 'F', heading: 0 },            //dragon curve
-    { axiom: 'A', rules: { A: '+BF-AFA-FB+', B: '-AF+BFB+FA-' }, angle: 90, depth: 4, draw: 'F', heading: 0 },  //Hilbert curve
-    { axiom: 'A', rules: { A: 'B-A-B', B: 'A+B+A' }, angle: 60, depth: 6, draw: 'AB', heading: 0 },             //sierpinski arrowhead
-    { axiom: 'X', rules: { X: 'F+[[X]-X]-F[X]-X', F: 'FF' }, angle: 25, depth: 4, draw: 'F', heading: -80 },    //ffractal plant
-    { axiom: 'F', rules: { F: '+F--F+' }, angle: 45, depth: 10, draw: 'F', heading: 0 },                        //lévy c curve
-    { axiom: 'A', rules: { A: 'A-B--B+A++AA+B-', B: '+A-AA--B-A+B' }, angle: 60, depth: 3, draw: 'AB', heading: 0 } //gosper curve
+    { axiom: 'F--F--F', rules: { F: 'F+F--F+F' }, angle: 60, depth: 3, draw: 'F', heading: 0 },
+    { axiom: 'FX', rules: { X: 'X+YF+', Y: '-FX-Y' }, angle: 90, depth: 10, draw: 'F', heading: 0 },
+    { axiom: 'A', rules: { A: '+BF-AFA-FB+', B: '-AF+BFB+FA-' }, angle: 90, depth: 4, draw: 'F', heading: 0 },
+    { axiom: 'A', rules: { A: 'B-A-B', B: 'A+B+A' }, angle: 60, depth: 6, draw: 'AB', heading: 0 },
+    { axiom: 'X', rules: { X: 'F+[[X]-X]-F[X]-X', F: 'FF' }, angle: 25, depth: 4, draw: 'F', heading: -80 },
+    { axiom: 'F', rules: { F: '+F--F+' }, angle: 45, depth: 10, draw: 'F', heading: 0 },
+    { axiom: 'A', rules: { A: 'A-B--B+A++AA+B-', B: '+A-AA--B-A+B' }, angle: 60, depth: 3, draw: 'AB', heading: 0 }
   ];
+
   function trace(f) {
     let s = f.axiom;
     for (let i = 0; i < f.depth; i++) s = [...s].map(c => f.rules[c] ?? c).join('');
@@ -196,6 +198,7 @@ body {
   let W = 0, H = 0, areas = [], order = [];
   let pts = [], i = 0, frac = 0, tx = 0, ty = 0, heading = -Math.PI / 2;
   let speed = 1, phase = 'walk', timer = 0, target = null, first = true;
+  let aboveCaption = null, firstDone = false;
 
   function box(el, r, pad) {
     const b = el.getBoundingClientRect();
@@ -213,10 +216,11 @@ body {
     ctx.strokeStyle = ink; ctx.lineWidth = 1.2; ctx.lineCap = ctx.lineJoin = 'round'; ctx.globalAlpha = 0.6;
     const T = box(title, r, 14), C = box(caption, r, 14);
     areas = [
-      { x: T.r, y: 0, w: W - T.r, h: C.t },          
-      { x: T.r, y: 0, w: C.l - T.r, h: H },         
-      { x: 0, y: T.b, w: C.l, h: H - T.b }   
+      { x: T.r, y: 0, w: W - T.r, h: C.t },
+      { x: T.r, y: 0, w: C.l - T.r, h: H },
+      { x: 0, y: T.b, w: C.l, h: H - T.b }
     ].filter(a => a.w >= 60 && a.h >= 60);
+    aboveCaption = { x: C.l, y: 0, w: W - C.l, h: C.t };
     start();
   }
 
@@ -233,6 +237,7 @@ body {
     const weights = areas.map(a => Math.min(a.w, a.h) ** 2);
     let pick = Math.random() * weights.reduce((s, v) => s + v, 0), area = areas[0];
     for (let k = 0; k < areas.length; k++) { pick -= weights[k]; if (pick <= 0) { area = areas[k]; break; } }
+    if (!firstDone && aboveCaption.w >= 60 && aboveCaption.h >= 60) area = aboveCaption;
     const pad = 8, s = Math.min((area.w - 2 * pad) / bw, (area.h - 2 * pad) / bh);
     const ox = area.x + pad + Math.random() * (area.w - 2 * pad - bw * s) - minX * s;
     const oy = area.y + pad + (area.h - 2 * pad - bh * s) / 2 - minY * s;
@@ -246,6 +251,7 @@ body {
     phase = 'walk';
     if (still) { tx = target.x; ty = target.y; while (i < pts.length) advance(1e9); phase = 'done'; }
   }
+
   function advance(budget) {
     while (budget > 0 && i < pts.length) {
       const p = pts[i - 1], q = pts[i];
@@ -272,7 +278,7 @@ body {
       else { heading = Math.atan2(dy, dx); tx += dx / d * 2; ty += dy / d * 2; }
     } else if (phase === 'draw') {
       advance(speed);
-      if (i >= pts.length) { phase = 'admire'; timer = 180; }
+      if (i >= pts.length) { phase = 'admire'; timer = 180; firstDone = true; }
     } else if (phase === 'admire') {
       if (--timer <= 0) { phase = 'clear'; timer = 30; }
     } else if (phase === 'clear') {
