@@ -132,7 +132,7 @@ body {
   </div>
   <figure class="me">
     <img src="images/me_with_cat.jpg" alt="Cat on lap from far away">
-    <figcaption>(My sister took this one. It's the cat from the photo at the bottom on my lap)</figcaption>
+    <figcaption>(My sister took this one. It's the cat from the photo at the bottom on my lap.)</figcaption>
   </figure>
 </header>
   <div class="gallery">
@@ -196,7 +196,31 @@ body {
     return pts;
   }
 
-  let W = 0, H = 0, areas = [], firstAreas = [], order = [];
+  let W = 0, H = 0, areas = [], firstAreas = [], order = [], titleBox = null, capBox = null;
+
+  function hits(a, b, R) {
+    for (let k = 0; k <= 60; k++) {
+      const x = a.x + (b.x - a.x) * k / 60, y = a.y + (b.y - a.y) * k / 60;
+      if (x > R.l && x < R.r && y > R.t && y < R.b) return true;
+    }
+    return false;
+  }
+
+  function route(from, to) {
+    const boxes = [titleBox, capBox];
+    const clear = (a, b) => !boxes.some(R => hits(a, b, R));
+    if (clear(from, to)) return [to];
+    const corners = [];
+    for (const R of boxes) for (const x of [R.l - 12, R.r + 12]) for (const y of [R.t - 12, R.b + 12]) {
+      if (x >= 0 && x <= W && y >= 0 && y <= H && !boxes.some(B => x > B.l && x < B.r && y > B.t && y < B.b)) corners.push({ x, y });
+    }
+    const len = p => p.reduce((s, q, k) => s + Math.hypot(q.x - (k ? p[k - 1] : from).x, q.y - (k ? p[k - 1] : from).y), 0);
+    let best = null;
+    const consider = p => { if (!best || len(p) < len(best)) best = p; };
+    for (const c of corners) if (clear(from, c) && clear(c, to)) consider([c, to]);
+    for (const c of corners) for (const d of corners) if (c !== d && clear(from, c) && clear(c, d) && clear(d, to)) consider([c, d, to]);
+    return best || [to];
+  }
 
   function nextFractal() {
     if (!order.length) order = FRACTALS.map((_, k) => k).sort(() => Math.random() - 0.5);
@@ -212,132 +236,4 @@ body {
     return a.l < b.r + 10 && b.l < a.r + 10 && a.t < b.b + 10 && b.t < a.b + 10;
   }
 
-  function makeTurtle(canvas, sprite, n) {
-    const ctx = canvas.getContext('2d');
-    const t = { pts: [], i: 0, frac: 0, tx: 0, ty: 0, heading: -Math.PI / 2, speed: 1,
-                phase: 'wait', timer: 0, target: null, first: true, firstDone: false, rect: null };
-
-    t.resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = W * dpr; canvas.height = H * dpr;
-      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.strokeStyle = ink; ctx.lineWidth = 1.2; ctx.lineCap = ctx.lineJoin = 'round'; ctx.globalAlpha = 0.6;
-      t.start();
-    };
-
-    t.start = () => {
-      ctx.save(); ctx.globalAlpha = 1; ctx.clearRect(0, 0, W, H); ctx.restore();
-      t.rect = null;
-      if (!areas.length) { sprite.style.display = 'none'; t.phase = 'off'; return; }
-      sprite.style.display = '';
-      const f = nextFractal();
-      const raw = trace(f);
-      const xs = raw.map(p => p.x), ys = raw.map(p => p.y);
-      const minX = Math.min(...xs), minY = Math.min(...ys);
-      const bw = Math.max(...xs) - minX || 1, bh = Math.max(...ys) - minY || 1;
-      const others = turtles.filter(o => o !== t && o.rect).map(o => o.rect);
-      const weights = areas.map(a => Math.min(a.w, a.h) ** 2);
-      const total = weights.reduce((s, v) => s + v, 0);
-      let place = null;
-      for (let attempt = 0; attempt < 40 && !place; attempt++) {
-        let area;
-        const fa = firstAreas[n];
-        if (!t.firstDone && attempt < 10 && fa && fa.w >= 60 && fa.h >= 60) area = fa;
-        else {
-          let pick = Math.random() * total; area = areas[0];
-          for (let k = 0; k < areas.length; k++) { pick -= weights[k]; if (pick <= 0) { area = areas[k]; break; } }
-        }
-        const pad = 8;
-        const s = Math.min((area.w - 2 * pad) / bw, (area.h - 2 * pad) / bh) * (attempt < 20 ? 1 : 0.7);
-        const x0 = area.x + pad + Math.random() * Math.max(0, area.w - 2 * pad - bw * s);
-        const y0 = area.y + pad + Math.random() * Math.max(0, area.h - 2 * pad - bh * s);
-        const rect = { l: x0, t: y0, r: x0 + bw * s, b: y0 + bh * s };
-        if (!others.some(o => overlaps(rect, o))) place = { s, ox: x0 - minX * s, oy: y0 - minY * s, rect };
-      }
-      if (!place) { t.phase = 'wait'; t.timer = 60; return; }
-      t.rect = place.rect;
-      t.pts = raw.map(p => ({ x: place.ox + p.x * place.s, y: place.oy + p.y * place.s, pen: p.pen }));
-      let length = 0;
-      for (let k = 1; k < t.pts.length; k++) if (t.pts[k].pen) length += Math.hypot(t.pts[k].x - t.pts[k - 1].x, t.pts[k].y - t.pts[k - 1].y);
-      t.speed = Math.max(0.5, length / (60 * 8));
-      t.i = 1; t.frac = 0;
-      t.target = t.pts[0];
-      if (t.first) { t.tx = t.target.x; t.ty = t.target.y; t.first = false; }
-      t.phase = 'walk';
-      if (still) { t.tx = t.target.x; t.ty = t.target.y; while (t.i < t.pts.length) t.advance(1e9); t.phase = 'done'; t.place(); }
-    };
-
-    t.advance = budget => {
-      while (budget > 0 && t.i < t.pts.length) {
-        const p = t.pts[t.i - 1], q = t.pts[t.i];
-        if (!q.pen) { t.tx = q.x; t.ty = q.y; t.i++; t.frac = 0; continue; }
-        const len = Math.hypot(q.x - p.x, q.y - p.y) || 1e-6;
-        t.heading = Math.atan2(q.y - p.y, q.x - p.x);
-        const go = Math.min(budget, len * (1 - t.frac));
-        t.frac += go / len;
-        const nx = p.x + (q.x - p.x) * t.frac, ny = p.y + (q.y - p.y) * t.frac;
-        ctx.beginPath(); ctx.moveTo(t.tx, t.ty); ctx.lineTo(nx, ny); ctx.stroke();
-        t.tx = nx; t.ty = ny; budget -= go;
-        if (t.frac >= 1 - 1e-9) { t.i++; t.frac = 0; }
-      }
-    };
-
-    t.place = () => {
-      sprite.style.transform = `translate(${t.tx}px, ${t.ty}px) rotate(${t.heading * 180 / Math.PI + 90}deg)`;
-    };
-
-    t.tick = () => {
-      if (t.phase === 'walk') {
-        const dx = t.target.x - t.tx, dy = t.target.y - t.ty, d = Math.hypot(dx, dy);
-        if (d < 2) { t.tx = t.target.x; t.ty = t.target.y; t.phase = 'draw'; }
-        else { t.heading = Math.atan2(dy, dx); t.tx += dx / d * 2; t.ty += dy / d * 2; }
-      } else if (t.phase === 'draw') {
-        t.advance(t.speed);
-        if (t.i >= t.pts.length) { t.phase = 'admire'; t.timer = 180; t.firstDone = true; }
-      } else if (t.phase === 'admire') {
-        if (--t.timer <= 0) { t.phase = 'clear'; t.timer = 30; }
-      } else if (t.phase === 'clear') {
-        ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 0.15; ctx.fillRect(0, 0, W, H); ctx.restore();
-        if (--t.timer <= 0) t.start();
-      } else if (t.phase === 'wait') {
-        if (--t.timer <= 0) t.start();
-      }
-      t.place();
-    };
-
-    return t;
-  }
-
-  const turtles = canvases.map((c, n) => makeTurtle(c, sprites[n], n));
-
-  function layout() {
-    const r = intro.getBoundingClientRect();
-    W = Math.max(0, photo.getBoundingClientRect().left - r.left - 12);
-    H = r.height;
-    const T = box(title, r, 14), C = box(caption, r, 14);
-    areas = [
-      { x: T.r, y: 0, w: W - T.r, h: C.t },
-      { x: T.r, y: 0, w: C.l - T.r, h: H },
-      { x: 0, y: T.b, w: C.l, h: H - T.b }
-    ].filter(a => a.w >= 60 && a.h >= 60);
-    firstAreas = [
-      { x: C.l, y: 0, w: W - C.l, h: C.t },
-      { x: 0, y: T.b, w: T.r, h: H - T.b }
-    ];
-    turtles.forEach(t => { t.rect = null; });
-    turtles.forEach(t => t.resize());
-  }
-
-  function frame() {
-    turtles.forEach(t => t.tick());
-    requestAnimationFrame(frame);
-  }
-
-  new ResizeObserver(layout).observe(intro);
-  layout();
-  if (!still) requestAnimationFrame(frame);
-})();
-</script>
-</body>
-</html>
+  function
