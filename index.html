@@ -76,6 +76,14 @@ body {
 .intro p {
   margin: 0;
 }
+.music {
+  display: block;
+  width: 360px;
+  max-width: 100%;
+  height: 20px;
+  margin-top: 12px;
+  border: 0;
+}
 .wander {
   position: absolute;
   top: 0;
@@ -129,6 +137,8 @@ body {
   <div>
     <h1>Matheus Martinelli Santana</h1>
     <p>Some of my favorite photographs I've taken</p>
+    <iframe class="music" title="Mendelssohn: Spring Song, played by Nathan Gulla" height="20" scrolling="no" frameborder="no" allow="autoplay"
+      src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/nrgpiano/mendelssohn-song-without-words-op-62-no-6-spring-song&color=%238db86b&inverse=true&auto_play=false&show_user=true"></iframe>
   </div>
   <figure class="me">
     <img src="images/me_with_cat.jpg" width="914" height="800" alt="Cat on lap from far away">
@@ -167,6 +177,7 @@ body {
   const title = intro.querySelector('div');
   const photo = intro.querySelector('.me img');
   const caption = intro.querySelector('.me figcaption');
+  const player = intro.querySelector('.music');
   const ink = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -198,7 +209,7 @@ body {
     return pts;
   }
 
-  let W = 0, H = 0, areas = [], firstAreas = [], order = [], titleBox = null, capBox = null;
+  let W = 0, H = 0, areas = [], firstAreas = [], order = [], titleBox = null, capBox = null, playerBox = null;
 
   function hits(a, b, R) {
     for (let k = 0; k <= 60; k++) {
@@ -209,7 +220,7 @@ body {
   }
 
   function route(from, to) {
-    const boxes = [titleBox, capBox];
+    const boxes = [titleBox, capBox, playerBox].filter(Boolean);
     const clear = (a, b) => !boxes.some(R => hits(a, b, R));
     if (clear(from, to)) return [to];
     const corners = [];
@@ -366,16 +377,19 @@ body {
     H = r.height;
     const T = box(title, r, 14), C = box(caption, r, 14);
     titleBox = box(title, r, 20); capBox = box(caption, r, 20);
-    areas = [
+    const P = player ? box(player, r, 30) : null;
+    playerBox = P;
+    const keepOff = list => P ? list.flatMap(a => cut(a, P)) : list;
+    areas = keepOff([
       { x: T.r, y: 0, w: W - T.r, h: C.t },
       { x: T.r, y: 0, w: C.l - T.r, h: H },
       { x: 0, y: T.b, w: C.l, h: H - T.b }
-    ].filter(a => a.w >= 60 && a.h >= 60);
-    const right = Math.max(C.l, T.r), under = Math.min(T.r, C.l);
-    firstAreas = [
+    ]).filter(a => a.w >= 60 && a.h >= 60);
+    const right = Math.max(C.l, T.r);
+    firstAreas = keepOff([
       { x: right, y: 0, w: W - right, h: C.t },
-      { x: 0, y: T.b, w: under, h: H - T.b }
-    ];
+      { x: T.r, y: 0, w: C.l - T.r, h: H }
+    ]).sort((a, b) => b.w * b.h - a.w * a.h);
     turtles.forEach(t => { t.rect = null; });
     turtles.forEach(t => t.resize());
   }
