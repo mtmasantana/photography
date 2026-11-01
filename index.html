@@ -77,12 +77,83 @@ body {
   margin: 0;
 }
 .music {
-  display: block;
-  width: 360px;
+  --accent: hsl(95 35% 55%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: max-content;
   max-width: 100%;
-  height: 20px;
-  margin-top: 12px;
+  box-sizing: border-box;
+  margin-top: 18px;
+  padding: 12px 22px 12px 12px;
+  background: hsl(40 10% 11%);
+  border: 1px solid hsl(40 12% 20%);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.music-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--page-bg);
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+.music-btn:hover { filter: brightness(1.12); transform: scale(1.05); }
+.music-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.music-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.music-btn .icon-pause,
+.music.playing .music-btn .icon-play { display: none; }
+.music.playing .music-btn .icon-pause { display: block; }
+.music-text {
+  min-width: 0;
+  line-height: 1.35;
+}
+.music-title {
+  font-weight: 600;
+}
+.music-sub {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: hsl(40 20% 62%);
+}
+.music-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 0;
+  background: var(--accent);
+  transition: width 0.3s linear;
+}
+.music-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.music.fallback { flex-wrap: wrap; width: 340px; }
+.music.fallback .music-btn,
+.music.fallback .music-progress { display: none; }
+.music.fallback .music-frame {
+  position: static;
+  width: 100%;
+  height: 20px;
+  opacity: 1;
+  pointer-events: auto;
 }
 .wander {
   position: absolute;
@@ -137,8 +208,19 @@ body {
   <div>
     <h1>Matheus Martinelli Santana</h1>
     <p>Some of my favorite photographs I've taken</p>
-    <iframe class="music" title="Mendelssohn: Spring Song, played by Nathan Gulla" height="20" scrolling="no" frameborder="no" allow="autoplay"
-      src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/nrgpiano/mendelssohn-song-without-words-op-62-no-6-spring-song&color=%238db86b&inverse=true&auto_play=false&show_user=true"></iframe>
+    <div class="music">
+      <button class="music-btn" type="button" aria-label="Play Frühlingslied">
+        <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      </button>
+      <div class="music-text">
+        <div class="music-title">Lieder ohne Worte, Op. 62 Nr. 6 „Frühlingslied“</div>
+        <div class="music-sub">Felix Mendelssohn played by Nathan Gulla</div>
+      </div>
+      <div class="music-progress" aria-hidden="true"></div>
+      <iframe class="music-frame" title="SoundCloud player: Frühlingslied, played by Nathan Gulla" scrolling="no" allow="autoplay"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/nrgpiano/mendelssohn-song-without-words-op-62-no-6-spring-song&color=%238db86b&auto_play=false&show_user=true"></iframe>
+    </div>
   </div>
   <figure class="me">
     <img src="images/me_with_cat.jpg" width="914" height="800" alt="Cat on lap from far away">
@@ -169,6 +251,40 @@ body {
     <img src="images/peacock.jpeg" alt="Indian peafowl">
     <img src="images/dog.jpeg" alt="Domestic dog (orange)">
   </div>
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+(() => {
+  const card = document.querySelector('.music');
+  const frame = card.querySelector('.music-frame');
+  const btn = card.querySelector('.music-btn');
+  const bar = card.querySelector('.music-progress');
+  const fallback = () => card.classList.add('fallback');
+  if (!window.SC || !SC.Widget) { fallback(); return; }
+
+  const widget = SC.Widget(frame);
+  const E = SC.Widget.Events;
+  let ready = false, pending = false, playing = false, check = null;
+
+  const show = on => {
+    playing = on;
+    card.classList.toggle('playing', on);
+    btn.setAttribute('aria-label', (on ? 'Pause' : 'Play') + ' Frühlingslied');
+  };
+
+  widget.bind(E.READY, () => { ready = true; if (pending) { pending = false; widget.play(); } });
+  widget.bind(E.PLAY, () => { clearTimeout(check); show(true); });
+  widget.bind(E.PAUSE, () => show(false));
+  widget.bind(E.FINISH, () => { show(false); bar.style.width = '0'; });
+  widget.bind(E.PLAY_PROGRESS, e => { bar.style.width = (e.relativePosition * 100) + '%'; });
+
+  btn.addEventListener('click', () => {
+    if (playing) { widget.pause(); return; }
+    if (ready) widget.play(); else pending = true;
+    clearTimeout(check);
+    check = setTimeout(() => { if (!playing) fallback(); }, 4000);
+  });
+})();
+</script>
 <script>
 (() => {
   const intro = document.querySelector('.intro');
