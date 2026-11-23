@@ -75,6 +75,9 @@ body {
   gap: 16px;
   margin-bottom: 16px;
 }
+.me {
+  align-self: center;
+}
 .intro > div,
 .me {
   position: relative;
@@ -417,7 +420,8 @@ body {
       t.pts = raw.map(p => ({ x: place.ox + p.x * place.s, y: place.oy + p.y * place.s, pen: p.pen }));
       let length = 0;
       for (let k = 1; k < t.pts.length; k++) if (t.pts[k].pen) length += Math.hypot(t.pts[k].x - t.pts[k - 1].x, t.pts[k].y - t.pts[k - 1].y);
-      t.speed = Math.max(0.5, length / (60 * 8));
+      const size = Math.max(bw, bh) * s;
+      t.speed = Math.max(0.5, length / (60 * 6 * Math.min(1, Math.sqrt(size / 200))));
       t.i = 1; t.frac = 0;
       if (t.first) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; t.first = false; }
       sprite.style.opacity = '';
