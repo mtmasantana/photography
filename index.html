@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matheus Santana</title>
+  <style>
+  @font-face {
+    font-family: "Old Newspaper Types";
+    src: url("fonts/OldNewspaperTypes.woff2") format("woff2");
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Traveling Typewriter";
+    src: url("fonts/TravelingTypewriter.woff2") format("woff2");
+    font-display: swap;
+  }
+  :root {
+    --outer-bg: hsl(45 13% 8%);
+    --page-bg:  hsl(40 12% 5%);
+    --text:     hsl(40 45% 84%); 
+  }
+html {
+  background: var(--outer-bg);
+}
+body {
+  margin: 0 auto;
+  max-width: 1200px;
+  min-height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: "Traveling Typewriter", system-ui;
+  background: var(--page-bg);
+  color: var(--text);
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-flow: dense;
+  gap: 12px;
+}
+.gallery img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+}
+.gallery img.tall {
+  grid-row: span 2;
+  aspect-ratio: auto;
+  height: 100%;
+  contain: size;
+}
+.fill {
+  position: relative;
+  overflow: hidden;
+}
+.fill::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background: var(--img) center / cover;
+  filter: blur(16px) brightness(0.6);
+}
+.fill img {
+  position: relative;
+  object-fit: contain;
+}
+.intro {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.intro > div,
+.me {
+  position: relative;
+  z-index: 1;
+}
+.intro h1 {
+  margin: 0 0 8px;
+  font-family: "Old Newspaper Types", system-ui;
+}
+.intro p {
+  margin: 0;
+}
+.flags {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.flags div {
+  display: flex;
+  gap: 8px;
+}
+.flags img {
+  display: block;
+  height: calc((100cqw - 48px) / 10.6047);
+  width: auto;
+}
+.flags .translate {
+  margin-top: 4px;
+}
+.languages button {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  opacity: 0.45;
+}
+.languages button[aria-pressed="true"] {
+  opacity: 1;
+}
+.languages button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+.wander {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.turtle {
+  position: absolute;
+  left: -10px;
+  top: -17px;
+  width: 20px;
+  height: 34px;
+  transform-origin: 10px 17px;
+  z-index: 2;
+  pointer-events: none;
+}
+.turtle polygon {
+  fill: hsl(95 35% 55%);
+}
+.me {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: 16px;
+  margin: 0;
+}
+.me img {
+  height: 170px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+.me figcaption {
+  margin: 0;
+  max-width: 230px;
+  text-align: right;
+  text-wrap: balance;
+}
+@media (max-width: 600px) {
+  .intro { flex-direction: column; }
+  .wander, .turtle { display: none; }
+}
+</style>
+</head>
+<body>
+<header class="intro">
+  <canvas class="wander" aria-hidden="true"></canvas>
+  <canvas class="wander" aria-hidden="true"></canvas>
+  <svg class="turtle" viewBox="-10 -17 20 34" aria-hidden="true"><polygon points="0,-16 -2,-14 -1,-10 -4,-7 -7,-9 -9,-8 -6,-5 -7,-1 -5,3 -8,6 -6,8 -4,5 0,7 4,5 6,8 8,6 5,3 7,-1 6,-5 9,-8 7,-9 4,-7 1,-10 2,-14"/></svg>
+  <svg class="turtle" viewBox="-10 -17 20 34" aria-hidden="true"><polygon points="0,-16 -2,-14 -1,-10 -4,-7 -7,-9 -9,-8 -6,-5 -7,-1 -5,3 -8,6 -6,8 -4,5 0,7 4,5 6,8 8,6 5,3 7,-1 6,-5 9,-8 7,-9 4,-7 1,-10 2,-14"/></svg>
+  <div>
+    <h1>Matheus Martinelli Santana</h1>
+    <p class="subtitle">My recent photographs</p>
+    <div class="flags">
+      <p class="origin">Where I'm from</p>
+      <div>
+        <img src="images/flags/friuli.webp" alt="Friuli">
+        <img src="images/flags/sicily.svg" alt="Sicily">
+        <img src="images/flags/sao-paulo.svg" alt="São Paulo">
+        <img src="images/flags/sergipe.svg" alt="Sergipe">
+        <img src="images/flags/spain.svg" alt="Spain">
+        <img src="images/flags/portugal.svg" alt="Portugal">
+        <img src="images/flags/germany.svg" alt="Germany">
+      </div>
+      <p class="translate">Click to translate</p>
+      <div class="languages">
+        <button type="button" data-lang="en" aria-pressed="true"><img src="images/flags/england.svg" alt="English"></button>
+        <button type="button" data-lang="pt" aria-pressed="false" data-origin="De onde eu sou" data-subtitle="Minhas fotos recentes" data-label="Aperta para traduzir" data-caption="(Minha irmã tirou essa foto. Sou eu com o gato da foto lá embaixo no meu colo.)"><img src="images/flags/portugal.svg" alt="Português"></button>
+        <button type="button" data-lang="it" aria-pressed="false" data-origin="Da dove vengo" data-subtitle="Le mie foto recenti" data-label="Premi per tradurre" data-caption="(Mia sorella ha scattato questa foto. Sono io con in braccio il gatto della foto là sotto.)"><img src="images/flags/italy.svg" alt="Italiano"></button>
+      </div>
+    </div>
+  </div>
+  <figure class="me">
+    <img src="images/me_with_cat.jpg" width="914" height="800" alt="Cat on lap from far away">
+    <figcaption>(My sister took this one. It's the cat from the photo at the bottom on my lap)</figcaption>
+  </figure>
+</header>
+  <div class="gallery">
+    <img src="images/donkeys.jpg" alt="Donkeys">
+    <img src="images/cat_tabby.jpg" alt="Domestic cat (tabby)">
+    <img src="images/agapanthus.jpg" alt="Agapanthus">
+    <img src="images/bracket_fungus.jpg" alt="Bracket fungus">
+    <img src="images/snowy_owl.jpg" alt="Snowy owl">
+    <img src="images/house_sparrow.jpg" alt="House sparrow">
+    <img src="images/queen_annes_lace.jpg" alt="Queen Anne's lace">
+    <img src="images/background.JPG" alt="Truck">
+    <img src="images/golden_pheasant.jpg" alt="Golden pheasant">
+    <img src="images/white_cat.JPG" alt="Domestic cat">
+    <img src="images/muscovy_ducks.jpg" alt="Muscovy ducks">
+    <img src="images/mallard.jpg" alt="Mallard">
+    <img src="images/olive_grove.jpg" alt="Olive grove">
+    <img class="tall" src="images/peacock_pheasant.jpg" alt="Peacock pheasant" style="object-position: right center;">
+    <img class="tall" src="images/common_kestrel.jpg" alt="Common kestrel">
+    <img src="images/southern_ground_hornbill.jpg" alt="Southern ground hornbill">
+    <img src="images/monk_parakeets.jpg" alt="Monk parakeets">
+    <img src="images/geraniums.JPG" alt="Geraniums">
+    <img src="images/marabou_stork.jpg" alt="Marabou stork">
+    <img src="images/cat_tuxedo_grass.jpg" alt="Domestic cat (black and white)">
+    <img src="images/peacock.jpeg" alt="Indian peafowl">
+    <img src="images/dog.jpeg" alt="Domestic dog (orange)">
+  </div>
+<script>
+(() => {
+  const name = document.querySelector('.intro h1');
+  const flags = document.querySelector('.flags');
+  const fit = () => {
+    const range = document.createRange();
+    range.selectNodeContents(name);
+    flags.style.width = range.getBoundingClientRect().width + 'px';
+  };
+  new ResizeObserver(fit).observe(name);
+  fit();
+  document.fonts.ready.then(fit);
+
+  const texts = [['.subtitle', 'subtitle'], ['.origin', 'origin'], ['.translate', 'label'], ['.me figcaption', 'caption']].map(([selector, key]) => {
+    const el = document.querySelector(selector);
+    return { el, key, original: el.textContent };
+  });
+  const buttons = [...document.querySelectorAll('.languages button')];
+  buttons.forEach(button => button.addEventListener('click', () => {
+    buttons.forEach(b => b.setAttribute('aria-pressed', b === button));
+    texts.forEach(({ el, key, original }) => {
+      el.textContent = button.dataset[key] || original;
+      el.lang = button.dataset.lang;
+    });
+  }));
+})();
+</script>
+<script>
+(() => {
+  const intro = document.querySelector('.intro');
+  const canvases = [...intro.querySelectorAll('.wander')];
+  const sprites = [...intro.querySelectorAll('.turtle')];
+  const title = intro.querySelector('div');
+  const photo = intro.querySelector('.me img');
+  const caption = intro.querySelector('.me figcaption');
+  const ink = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const FRACTALS = [
+    { axiom: 'F--F--F', rules: { F: 'F+F--F+F' }, angle: 60, depth: 3, draw: 'F', heading: 0 },
+    { axiom: 'FX', rules: { X: 'X+YF+', Y: '-FX-Y' }, angle: 90, depth: 10, draw: 'F', heading: 0, cut: 0.25 },
+    { axiom: 'A', rules: { A: '+BF-AFA-FB+', B: '-AF+BFB+FA-' }, angle: 90, depth: 4, draw: 'F', heading: 0 },
+    { axiom: 'A', rules: { A: 'B-A-B', B: 'A+B+A' }, angle: 60, depth: 6, draw: 'AB', heading: 0 },
+    { axiom: 'A', rules: { A: 'A-B--B+A++AA+B-', B: '+A-BB--B-A++A+B' }, angle: 60, depth: 3, draw: 'AB', heading: 0 },
+    { axiom: 'X', rules: { X: 'XFYFX+F+YFXFY-F-XFYFX', Y: 'YFXFY-F-XFYFX+F+YFXFY' }, angle: 90, depth: 3, draw: 'F', heading: 0, cut: 0.25 },
+    { axiom: 'F-F-F-F', rules: { F: 'F-F+F+F-F' }, angle: 90, depth: 3, draw: 'F', heading: 0 },
+    { axiom: 'F--XF--F--XF', rules: { X: 'XF+F+XF--F--XF+F+X' }, angle: 45, depth: 3, draw: 'F', heading: 0 }
+  ];
+
+  function trace(f) {
+    let s = f.axiom;
+    for (let i = 0; i < f.depth; i++) s = [...s].map(c => f.rules[c] ?? c).join('');
+    const turn = f.angle * Math.PI / 180;
+    let x = 0, y = 0, a = f.heading * Math.PI / 180;
+    const stack = [], pts = [{ x, y, pen: false }];
+    for (const c of s) {
+      if (f.draw.includes(c)) { x += Math.cos(a); y += Math.sin(a); pts.push({ x, y, pen: true }); }
+      else if (c === '+') a += turn;
+      else if (c === '-') a -= turn;
+      else if (c === '[') stack.push([x, y, a]);
+      else if (c === ']') { [x, y, a] = stack.pop(); pts.push({ x, y, pen: false }); }
+    }
+    const path = f.cut ? cutCorners(pts, f.cut) : pts;
+    const key = p => Math.round(p.x * 100) + ',' + Math.round(p.y * 100);
+    const seen = new Set();
+    for (let k = 1; k < path.length; k++) {
+      if (!path[k].pen) continue;
+      const from = key(path[k - 1]), to = key(path[k]);
+      const id = from < to ? from + '|' + to : to + '|' + from;
+      if (seen.has(id)) path[k].pen = false; else seen.add(id);
+    }
+    return path;
+  }
+
+  function cutCorners(pts, r) {
+    const out = [{ x: pts[0].x, y: pts[0].y, pen: false }];
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], b = pts[k];
+      if (!b.pen) { out.push({ x: b.x, y: b.y, pen: false }); continue; }
+      const dx = b.x - a.x, dy = b.y - a.y;
+      out.push({ x: a.x + dx * r, y: a.y + dy * r, pen: k > 1 && a.pen });
+      out.push({ x: b.x - dx * r, y: b.y - dy * r, pen: true });
+    }
+    return out;
+  }
+
+  let W = 0, H = 0, areas = [], firstAreas = [], titleBox = null, capBox = null;
+  let draws = 0;
+  const lastDrawn = FRACTALS.map(() => -Infinity);
+
+  function hits(a, b, R) {
+    for (let k = 0; k <= 60; k++) {
+      const x = a.x + (b.x - a.x) * k / 60, y = a.y + (b.y - a.y) * k / 60;
+      if (x > R.l && x < R.r && y > R.t && y < R.b) return true;
+    }
+    return false;
+  }
+
+  function route(from, to) {
+    const boxes = [titleBox, capBox];
+    const clear = (a, b) => !boxes.some(R => hits(a, b, R));
+    if (clear(from, to)) return [to];
+    const corners = [];
+    for (const R of boxes) for (const x of [R.l - 12, R.r + 12]) for (const y of [R.t - 12, R.b + 12]) {
+      if (x >= 0 && x <= W && y >= 0 && y <= H && !boxes.some(B => x > B.l && x < B.r && y > B.t && y < B.b)) corners.push({ x, y });
+    }
+    const len = p => p.reduce((s, q, k) => s + Math.hypot(q.x - (k ? p[k - 1] : from).x, q.y - (k ? p[k - 1] : from).y), 0);
+    let best = null;
+    const consider = p => { if (!best || len(p) < len(best)) best = p; };
+    for (const c of corners) if (clear(from, c) && clear(c, to)) consider([c, to]);
+    for (const c of corners) for (const d of corners) if (c !== d && clear(from, c) && clear(c, d) && clear(d, to)) consider([c, d, to]);
+    return best;
+  }
+
+  function nextFractal(avoid) {
+    draws++;
+    const weights = FRACTALS.map((_, k) => avoid.includes(k) ? 0 : Math.min(draws - lastDrawn[k], FRACTALS.length) ** 2);
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    let k = 0;
+    while (k < FRACTALS.length - 1 && (r -= weights[k]) > 0) k++;
+    while (weights[k] === 0) k = (k + 1) % FRACTALS.length;
+    lastDrawn[k] = draws;
+    return k;
+  }
+
+  function box(el, r, pad) {
+    const b = el.getBoundingClientRect();
+    return { l: b.left - r.left - pad, t: b.top - r.top - pad, r: b.right - r.left + pad, b: b.bottom - r.top + pad };
+  }
+
+  function cut(R, o) {
+    const m = 10, l = o.l - m, r = o.r + m, tp = o.t - m, b = o.b + m;
+    if (R.x >= r || R.x + R.w <= l || R.y >= b || R.y + R.h <= tp) return [R];
+    return [
+      { x: R.x, y: R.y, w: l - R.x, h: R.h },
+      { x: r, y: R.y, w: R.x + R.w - r, h: R.h },
+      { x: R.x, y: R.y, w: R.w, h: tp - R.y },
+      { x: R.x, y: b, w: R.w, h: R.y + R.h - b }
+    ].filter(q => q.w > 0 && q.h > 0);
+  }
+
+  function bestSpot(pool, others, bw, bh, pad) {
+    let best = null;
+    for (const A of pool) {
+      let pieces = [A];
+      for (const o of others) pieces = pieces.flatMap(R => cut(R, o));
+      for (const R of pieces) {
+        const s = Math.min((R.w - 2 * pad) / bw, (R.h - 2 * pad) / bh);
+        if (s <= 0) continue;
+        if (!best || s > best.s * 1.001 || (s > best.s * 0.999 && Math.random() < 0.5)) best = { s, R };
+      }
+    }
+    return best;
+  }
+
+  function makeTurtle(canvas, sprite, n) {
+    const ctx = canvas.getContext('2d');
+    const t = { pts: [], i: 0, frac: 0, tx: 0, ty: 0, heading: -Math.PI / 2, speed: 1,
+                phase: 'wait', timer: 0, target: null, first: true, firstDone: false, rect: null };
+
+    t.resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.strokeStyle = ink; ctx.lineWidth = 1.2; ctx.lineCap = ctx.lineJoin = 'round'; ctx.globalAlpha = 0.6;
+      t.start();
+    };
+
+    t.start = () => {
+      ctx.save(); ctx.globalAlpha = 1; ctx.clearRect(0, 0, W, H); ctx.restore();
+      t.rect = null;
+      if (!areas.length) { sprite.style.display = 'none'; t.phase = 'off'; return; }
+      sprite.style.display = '';
+      t.fi = nextFractal(turtles.filter(o => o !== t && o.rect).map(o => o.fi));
+      const f = FRACTALS[t.fi];
+      const raw = trace(f);
+      const xs = raw.map(p => p.x), ys = raw.map(p => p.y);
+      const minX = Math.min(...xs), minY = Math.min(...ys);
+      const bw = Math.max(...xs) - minX || 1, bh = Math.max(...ys) - minY || 1;
+      const others = turtles.filter(o => o !== t && o.rect).map(o => o.rect);
+      const pad = 8;
+      const fa = firstAreas[n];
+      let spot = null;
+      if (!t.firstDone && fa && fa.w >= 60 && fa.h >= 60) spot = bestSpot([fa], others, bw, bh, pad);
+      if (!spot) spot = bestSpot(areas, others, bw, bh, pad);
+      if (!spot || Math.max(bw, bh) * spot.s < 40) { t.phase = 'wait'; t.timer = 60; return; }
+      const { s, R } = spot;
+      const x0 = R.x + pad + Math.random() * Math.max(0, R.w - 2 * pad - bw * s);
+      const y0 = R.y + pad + Math.random() * Math.max(0, R.h - 2 * pad - bh * s);
+      const place = { s, ox: x0 - minX * s, oy: y0 - minY * s, rect: { l: x0, t: y0, r: x0 + bw * s, b: y0 + bh * s } };
+      t.rect = place.rect;
+      t.pts = raw.map(p => ({ x: place.ox + p.x * place.s, y: place.oy + p.y * place.s, pen: p.pen }));
+      let length = 0;
+      for (let k = 1; k < t.pts.length; k++) if (t.pts[k].pen) length += Math.hypot(t.pts[k].x - t.pts[k - 1].x, t.pts[k].y - t.pts[k - 1].y);
+      t.speed = Math.max(0.5, length / (60 * 8));
+      t.i = 1; t.frac = 0;
+      if (t.first) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; t.first = false; }
+      sprite.style.opacity = '';
+      const path = route({ x: t.tx, y: t.ty }, t.pts[0]);
+      if (path) { t.path = path; t.target = t.path.shift(); t.phase = 'walk'; }
+      else { t.phase = 'hop'; t.timer = 20; t.hopped = false; }
+      if (still) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; while (t.i < t.pts.length) t.advance(1e9); t.phase = 'done'; t.place(); }
+    };
+
+    t.advance = budget => {
+      while (budget > 0 && t.i < t.pts.length) {
+        const p = t.pts[t.i - 1], q = t.pts[t.i];
+        if (!q.pen) { t.tx = q.x; t.ty = q.y; t.i++; t.frac = 0; continue; }
+        const len = Math.hypot(q.x - p.x, q.y - p.y) || 1e-6;
+        t.heading = Math.atan2(q.y - p.y, q.x - p.x);
+        const go = Math.min(budget, len * (1 - t.frac));
+        t.frac += go / len;
+        const nx = p.x + (q.x - p.x) * t.frac, ny = p.y + (q.y - p.y) * t.frac;
+        ctx.beginPath(); ctx.moveTo(t.tx, t.ty); ctx.lineTo(nx, ny); ctx.stroke();
+        t.tx = nx; t.ty = ny; budget -= go;
+        if (t.frac >= 1 - 1e-9) { t.i++; t.frac = 0; }
+      }
+    };
+
+    t.place = () => {
+      sprite.style.transform = `translate(${t.tx}px, ${t.ty}px) rotate(${t.heading * 180 / Math.PI + 90}deg)`;
+    };
+
+    t.tick = dt => {
+      if (t.phase === 'walk') {
+        const dx = t.target.x - t.tx, dy = t.target.y - t.ty, d = Math.hypot(dx, dy);
+        const step = 2 * dt;
+        if (d <= Math.max(2, step)) {
+          t.tx = t.target.x; t.ty = t.target.y;
+          if (t.path.length) t.target = t.path.shift(); else t.phase = 'draw';
+        }
+        else { t.heading = Math.atan2(dy, dx); t.tx += dx / d * step; t.ty += dy / d * step; }
+      } else if (t.phase === 'hop') {
+        t.timer -= dt;
+        if (!t.hopped && t.timer <= 10) { t.tx = t.pts[0].x; t.ty = t.pts[0].y; t.hopped = true; }
+        sprite.style.opacity = Math.min(1, Math.abs(t.timer - 10) / 10);
+        if (t.timer <= 0) { sprite.style.opacity = ''; t.phase = 'draw'; }
+      } else if (t.phase === 'draw') {
+        t.advance(t.speed * dt);
+        if (t.i >= t.pts.length) { t.phase = 'admire'; t.timer = 180; t.firstDone = true; }
+      } else if (t.phase === 'admire') {
+        if ((t.timer -= dt) <= 0) { t.phase = 'clear'; t.timer = 30; }
+      } else if (t.phase === 'clear') {
+        ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1 - Math.pow(0.85, dt); ctx.fillRect(0, 0, W, H); ctx.restore();
+        if ((t.timer -= dt) <= 0) t.start();
+      } else if (t.phase === 'wait') {
+        if ((t.timer -= dt) <= 0) t.start();
+      }
+      t.place();
+    };
+
+    return t;
+  }
+
+  const turtles = canvases.map((c, n) => makeTurtle(c, sprites[n], n));
+
+  function layout() {
+    const r = intro.getBoundingClientRect();
+    W = Math.max(0, photo.getBoundingClientRect().left - r.left - 12);
+    H = r.height;
+    const T = box(title, r, 14), C = box(caption, r, 14);
+    titleBox = box(title, r, 20); capBox = box(caption, r, 20);
+    areas = [
+      { x: T.r, y: 0, w: W - T.r, h: C.t },
+      { x: T.r, y: 0, w: C.l - T.r, h: H },
+      { x: 0, y: T.b, w: C.l, h: H - T.b }
+    ].filter(a => a.w >= 60 && a.h >= 60);
+    const right = Math.max(C.l, T.r), under = Math.min(T.r, C.l);
+    firstAreas = [
+      { x: right, y: 0, w: W - right, h: C.t },
+      { x: 0, y: T.b, w: under, h: H - T.b }
+    ];
+    turtles.forEach(t => { t.rect = null; });
+    turtles.forEach(t => t.resize());
+  }
+
+  let last = null;
+  function frame(now) {
+    const dt = last === null ? 1 : Math.min((now - last) / (1000 / 60), 4);
+    last = now;
+    turtles.forEach(t => t.tick(dt));
+    requestAnimationFrame(frame);
+  }
+
+  const watcher = new ResizeObserver(layout);
+  watcher.observe(intro);
+  watcher.observe(photo);
+  watcher.observe(title);
+  watcher.observe(caption);
+  layout();
+  if (!still) requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
