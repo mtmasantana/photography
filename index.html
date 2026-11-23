@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Matheus Santana</title>
   <style>
+  @font-face {
+    font-family: "Old Newspaper Types";
+    src: url("fonts/OldNewspaperTypes.woff2") format("woff2");
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Traveling Typewriter";
+    src: url("fonts/TravelingTypewriter.woff2") format("woff2");
+    font-display: swap;
+  }
   :root {
     --outer-bg: hsl(45 13% 8%);
     --page-bg:  hsl(40 12% 5%);
@@ -19,7 +29,7 @@ body {
   min-height: 100vh;
   padding: 16px;
   box-sizing: border-box;
-  font-family: system-ui;
+  font-family: "Traveling Typewriter", system-ui;
   background: var(--page-bg);
   color: var(--text);
 }
@@ -72,9 +82,44 @@ body {
 }
 .intro h1 {
   margin: 0 0 8px;
+  font-family: "Old Newspaper Types", system-ui;
 }
 .intro p {
   margin: 0;
+}
+.flags {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.flags div {
+  display: flex;
+  gap: 8px;
+}
+.flags img {
+  display: block;
+  height: calc((100cqw - 56px) / 12.1047);
+  width: auto;
+}
+.flags .translate {
+  margin-top: 4px;
+}
+.languages button {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  opacity: 0.45;
+}
+.languages button[aria-pressed="true"] {
+  opacity: 1;
+}
+.languages button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 .wander {
   position: absolute;
@@ -128,7 +173,26 @@ body {
   <svg class="turtle" viewBox="-10 -17 20 34" aria-hidden="true"><polygon points="0,-16 -2,-14 -1,-10 -4,-7 -7,-9 -9,-8 -6,-5 -7,-1 -5,3 -8,6 -6,8 -4,5 0,7 4,5 6,8 8,6 5,3 7,-1 6,-5 9,-8 7,-9 4,-7 1,-10 2,-14"/></svg>
   <div>
     <h1>Matheus Martinelli Santana</h1>
-    <p>Some of my favorite photographs I've taken</p>
+    <p class="subtitle">My recent photographs</p>
+    <div class="flags">
+      <p class="origin">Where I'm from</p>
+      <div>
+        <img src="images/flags/friuli.webp" alt="Friuli">
+        <img src="images/flags/sicily.svg" alt="Sicily">
+        <img src="images/flags/france.svg" alt="France">
+        <img src="images/flags/portugal.svg" alt="Portugal">
+        <img src="images/flags/netherlands.svg" alt="Netherlands">
+        <img src="images/flags/spain.svg" alt="Spain">
+        <img src="images/flags/germany.svg" alt="Germany">
+        <img src="images/flags/brazil.svg" alt="Brazil">
+      </div>
+      <p class="translate">Click to translate</p>
+      <div class="languages">
+        <button type="button" data-lang="en" aria-pressed="true"><img src="images/flags/england.svg" alt="English"></button>
+        <button type="button" data-lang="pt" aria-pressed="false" data-origin="De onde eu sou" data-subtitle="Minhas fotos recentes" data-label="Aperta para traduzir" data-caption="(Minha irmã tirou essa foto. Sou eu com o gato da foto lá embaixo no meu colo.)"><img src="images/flags/portugal.svg" alt="Português"></button>
+        <button type="button" data-lang="it" aria-pressed="false" data-origin="Da dove vengo" data-subtitle="Le mie foto recenti" data-label="Premi per tradurre" data-caption="(Mia sorella ha scattato questa foto. Sono io con in braccio il gatto della foto là sotto.)"><img src="images/flags/italy.svg" alt="Italiano"></button>
+      </div>
+    </div>
   </div>
   <figure class="me">
     <img src="images/me_with_cat.jpg" width="914" height="800" alt="Cat on lap from far away">
@@ -148,17 +212,44 @@ body {
     <img src="images/white_cat.JPG" alt="Domestic cat">
     <img src="images/muscovy_ducks.jpg" alt="Muscovy ducks">
     <img src="images/mallard.jpg" alt="Mallard">
-    <img src="images/geraniums.JPG" alt="Geraniums">
+    <img src="images/olive_grove.jpg" alt="Olive grove">
     <img class="tall" src="images/peacock_pheasant.jpg" alt="Peacock pheasant" style="object-position: right center;">
     <img class="tall" src="images/common_kestrel.jpg" alt="Common kestrel">
     <img src="images/southern_ground_hornbill.jpg" alt="Southern ground hornbill">
     <img src="images/monk_parakeets.jpg" alt="Monk parakeets">
+    <img src="images/geraniums.JPG" alt="Geraniums">
     <img src="images/marabou_stork.jpg" alt="Marabou stork">
-    <img src="images/saddle_billed_stork.jpg" alt="Saddle-billed stork" style="aspect-ratio: 4 / 3;">
     <img src="images/cat_tuxedo_grass.jpg" alt="Domestic cat (black and white)">
     <img src="images/peacock.jpeg" alt="Indian peafowl">
     <img src="images/dog.jpeg" alt="Domestic dog (orange)">
   </div>
+<script>
+(() => {
+  const name = document.querySelector('.intro h1');
+  const flags = document.querySelector('.flags');
+  const fit = () => {
+    const range = document.createRange();
+    range.selectNodeContents(name);
+    flags.style.width = range.getBoundingClientRect().width + 'px';
+  };
+  new ResizeObserver(fit).observe(name);
+  fit();
+  document.fonts.ready.then(fit);
+
+  const texts = [['.subtitle', 'subtitle'], ['.origin', 'origin'], ['.translate', 'label'], ['.me figcaption', 'caption']].map(([selector, key]) => {
+    const el = document.querySelector(selector);
+    return { el, key, original: el.textContent };
+  });
+  const buttons = [...document.querySelectorAll('.languages button')];
+  buttons.forEach(button => button.addEventListener('click', () => {
+    buttons.forEach(b => b.setAttribute('aria-pressed', b === button));
+    texts.forEach(({ el, key, original }) => {
+      el.textContent = button.dataset[key] || original;
+      el.lang = button.dataset.lang;
+    });
+  }));
+})();
+</script>
 <script>
 (() => {
   const intro = document.querySelector('.intro');
@@ -172,13 +263,12 @@ body {
 
   const FRACTALS = [
     { axiom: 'F--F--F', rules: { F: 'F+F--F+F' }, angle: 60, depth: 3, draw: 'F', heading: 0 },
-    { axiom: 'FX', rules: { X: 'X+YF+', Y: '-FX-Y' }, angle: 90, depth: 10, draw: 'F', heading: 0 },
+    { axiom: 'FX', rules: { X: 'X+YF+', Y: '-FX-Y' }, angle: 90, depth: 10, draw: 'F', heading: 0, cut: 0.25 },
     { axiom: 'A', rules: { A: '+BF-AFA-FB+', B: '-AF+BFB+FA-' }, angle: 90, depth: 4, draw: 'F', heading: 0 },
     { axiom: 'A', rules: { A: 'B-A-B', B: 'A+B+A' }, angle: 60, depth: 6, draw: 'AB', heading: 0 },
-    { axiom: 'X', rules: { X: 'F+[[X]-X]-F[X]-X', F: 'FF' }, angle: 25, depth: 4, draw: 'F', heading: -80 },
     { axiom: 'A', rules: { A: 'A-B--B+A++AA+B-', B: '+A-BB--B-A++A+B' }, angle: 60, depth: 3, draw: 'AB', heading: 0 },
-    { axiom: '[N]++[N]++[N]++[N]++[N]', rules: { M: 'OF++PF----NF[-OF----MF]++', N: '+OF--PF[---MF--NF]+', O: '-MF++NF[+++OF++PF]-', P: '--OF++++MF[+PF++++NF]--NF', F: '' }, angle: 36, depth: 4, draw: 'F', heading: 0 },
-    { axiom: 'F-F-F-F-F', rules: { F: 'F-F++F+F-F-F' }, angle: 72, depth: 3, draw: 'F', heading: 0 },
+    { axiom: 'X', rules: { X: 'XFYFX+F+YFXFY-F-XFYFX', Y: 'YFXFY-F-XFYFX+F+YFXFY' }, angle: 90, depth: 3, draw: 'F', heading: 0, cut: 0.25 },
+    { axiom: 'F-F-F-F', rules: { F: 'F-F+F+F-F' }, angle: 90, depth: 3, draw: 'F', heading: 0 },
     { axiom: 'F--XF--F--XF', rules: { X: 'XF+F+XF--F--XF+F+X' }, angle: 45, depth: 3, draw: 'F', heading: 0 }
   ];
 
@@ -195,10 +285,33 @@ body {
       else if (c === '[') stack.push([x, y, a]);
       else if (c === ']') { [x, y, a] = stack.pop(); pts.push({ x, y, pen: false }); }
     }
-    return pts;
+    const path = f.cut ? cutCorners(pts, f.cut) : pts;
+    const key = p => Math.round(p.x * 100) + ',' + Math.round(p.y * 100);
+    const seen = new Set();
+    for (let k = 1; k < path.length; k++) {
+      if (!path[k].pen) continue;
+      const from = key(path[k - 1]), to = key(path[k]);
+      const id = from < to ? from + '|' + to : to + '|' + from;
+      if (seen.has(id)) path[k].pen = false; else seen.add(id);
+    }
+    return path;
   }
 
-  let W = 0, H = 0, areas = [], firstAreas = [], order = [], titleBox = null, capBox = null;
+  function cutCorners(pts, r) {
+    const out = [{ x: pts[0].x, y: pts[0].y, pen: false }];
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], b = pts[k];
+      if (!b.pen) { out.push({ x: b.x, y: b.y, pen: false }); continue; }
+      const dx = b.x - a.x, dy = b.y - a.y;
+      out.push({ x: a.x + dx * r, y: a.y + dy * r, pen: k > 1 && a.pen });
+      out.push({ x: b.x - dx * r, y: b.y - dy * r, pen: true });
+    }
+    return out;
+  }
+
+  let W = 0, H = 0, areas = [], firstAreas = [], titleBox = null, capBox = null;
+  let draws = 0;
+  const lastDrawn = FRACTALS.map(() => -Infinity);
 
   function hits(a, b, R) {
     for (let k = 0; k <= 60; k++) {
@@ -224,9 +337,15 @@ body {
     return best;
   }
 
-  function nextFractal() {
-    if (!order.length) order = FRACTALS.map((_, k) => k).sort(() => Math.random() - 0.5);
-    return FRACTALS[order.pop()];
+  function nextFractal(avoid) {
+    draws++;
+    const weights = FRACTALS.map((_, k) => avoid.includes(k) ? 0 : Math.min(draws - lastDrawn[k], FRACTALS.length) ** 2);
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    let k = 0;
+    while (k < FRACTALS.length - 1 && (r -= weights[k]) > 0) k++;
+    while (weights[k] === 0) k = (k + 1) % FRACTALS.length;
+    lastDrawn[k] = draws;
+    return k;
   }
 
   function box(el, r, pad) {
@@ -278,7 +397,8 @@ body {
       t.rect = null;
       if (!areas.length) { sprite.style.display = 'none'; t.phase = 'off'; return; }
       sprite.style.display = '';
-      const f = nextFractal();
+      t.fi = nextFractal(turtles.filter(o => o !== t && o.rect).map(o => o.fi));
+      const f = FRACTALS[t.fi];
       const raw = trace(f);
       const xs = raw.map(p => p.x), ys = raw.map(p => p.y);
       const minX = Math.min(...xs), minY = Math.min(...ys);
@@ -391,6 +511,8 @@ body {
   const watcher = new ResizeObserver(layout);
   watcher.observe(intro);
   watcher.observe(photo);
+  watcher.observe(title);
+  watcher.observe(caption);
   layout();
   if (!still) requestAnimationFrame(frame);
 })();
